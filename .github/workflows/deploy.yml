@@ -1,0 +1,27 @@
+name: Deploy to Specific cPanel Folder
+
+on:
+  push:
+    branches:
+      - main # আপনার মেইন ব্রাঞ্চের নাম (যেমন: main বা master)
+
+jobs:
+  web-deploy:
+    name: Deploy Website
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get latest code
+      uses: actions/checkout@v3
+    
+    - name: Sync files to cPanel Subdomain
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./ # গিটহাবের রুট ডিরেক্টরি থেকে সব ফাইল যাবে
+        
+        # গুরুত্বপূর্ণ অংশ: 
+        # স্টেপ ১-এ FTP ডিরেক্টরি যদি 'public_html/age60.myjss.edu.bd' দেওয়া থাকে, তবে এখানে শুধু './' দিলেই হবে।
+        # আর FTP ডিরেক্টরি যদি একদম মেইন রুট হয়, তবে নিচে এভাবে লিখুন:
+        server-dir: ./public_html/age60.myjss.edu.bd/
