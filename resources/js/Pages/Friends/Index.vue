@@ -212,79 +212,56 @@ const showAccountsMessage = () => {
                 </div>
             </div>
 
-            <div class="row g-4">
-                <div v-for="alumnus in alumni.data" :key="alumnus.id" class="col-12 col-md-6 col-lg-4">
-                    <div class="card friend-card-modern h-100 border-0 shadow-sm">
-                        <div class="card-body p-4 d-flex flex-column justify-content-between">
-                            <!-- কার্ডের উপরের অংশ -->
-                            <div>
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <!-- প্রোফাইল পিকচার / ইনিশিয়াল -->
-                                    <div class="friend-avatar d-flex justify-content-center align-items-center shadow-sm">
-                                        <span class="fw-bold text-white">{{ (alumnus.name || '').split(' ').map(n=>n[0]).join('').slice(0,2) }}</span>
+            <!-- টেবিল -->
+            <div class="friends-table-wrapper glass-card p-0 overflow-hidden mb-4">
+                <div class="table-responsive">
+                    <table class="table friends-table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="col-serial text-center"><i class="fas fa-hashtag me-1"></i> ক্রমিক</th>
+                                <th><i class="fas fa-user me-1"></i> নাম</th>
+                                <th><i class="fas fa-graduation-cap me-1"></i> ব্যাচ নাম</th>
+                                <th><i class="fas fa-map-marker-alt me-1"></i> ঠিকানা</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template v-if="alumni.data.length > 0">
+                                <tr v-for="(alumnus, index) in alumni.data" :key="alumnus.id" class="friend-row">
+                                    <td class="text-center fw-semibold serial-cell">
+                                        {{ toBengaliDigits((alumni.current_page - 1) * alumni.per_page + index + 1) }}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="friend-avatar-sm d-flex justify-content-center align-items-center shadow-sm">
+                                                <span class="fw-bold text-white">{{ (alumnus.name || '').split(' ').map(n=>n[0]).join('').slice(0,2) }}</span>
+                                            </div>
+                                            <span class="friend-name-table fw-semibold">{{ alumnus.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-batch px-3 py-2 rounded-pill fw-semibold">
+                                            ব্যাচ {{ toBengaliDigits(alumnus.batch || '—') }}
+                                        </span>
+                                    </td>
+                                    <td class="address-cell">
+                                        <span v-if="alumnus.address">
+                                            <i class="fas fa-map-marker-alt text-danger me-2"></i>{{ alumnus.address }}
+                                        </span>
+                                        <span v-else class="text-muted fst-italic">ঠিকানা উল্লেখ নেই</span>
+                                    </td>
+                                </tr>
+                            </template>
+                            <tr v-else>
+                                <td colspan="4" class="text-center py-5">
+                                    <div class="p-5">
+                                        <i class="fas fa-search-minus fs-1 mb-3 text-muted"></i>
+                                        <h4 class="fw-bold text-muted">কোনো বন্ধু পাওয়া যায়নি</h4>
+                                        <p class="text-muted mb-0">অনুগ্রহ করে ভিন্ন নাম বা ব্যাচ দিয়ে পুনরায় অনুসন্ধান করুন।</p>
                                     </div>
-                                    <!-- ব্যাচ ব্যাজ -->
-                                    <span class="badge badge-batch px-3 py-2 rounded-pill fw-semibold">
-                                        <i class="fas fa-graduation-cap me-1"></i> ব্যাচ {{ toBengaliDigits(alumnus.batch || '—') }}
-                                    </span>
-                                </div>
-
-                                <h5 class="fw-bold text-dark mb-1 friend-name">{{ alumnus.name }}</h5>
-                                <div class="address-text mb-3" v-if="alumnus.address">
-                                    <i class="fas fa-map-marker-alt text-danger me-2"></i> {{ alumnus.address }}
-                                </div>
-                                <div class="address-text mb-3 text-muted fst-italic" v-else>
-                                    <i class="fas fa-map-marker-alt text-muted me-2"></i> ঠিকানা উল্লেখ নেই
-                                </div>
-                            </div>
-
-                            <!-- কার্ডের যোগাযোগের তথ্য -->
-                            <div class="contact-section mt-auto pt-3 border-top">
-                                <div class="d-flex align-items-center mb-2 text-secondary small">
-                                    <div class="icon-wrap me-2">
-                                        <i class="fas fa-phone-alt"></i>
-                                    </div>
-                                    <a :href="`tel:${alumnus.phone}`" class="text-decoration-none contact-link text-dark fw-medium">
-                                        {{ toBengaliDigits(alumnus.phone || '—') }}
-                                    </a>
-                                </div>
-                                <div class="d-flex align-items-center text-secondary small mb-3">
-                                    <div class="icon-wrap me-2">
-                                        <i class="fas fa-envelope"></i>
-                                    </div>
-                                    <a v-if="alumnus.email" :href="`mailto:${alumnus.email}`" class="text-decoration-none contact-link text-dark fw-medium">
-                                        {{ alumnus.email }}
-                                    </a>
-                                    <span v-else class="text-muted fst-italic">ইমেইল নেই</span>
-                                </div>
-
-                                <!-- বাটন অ্যাকশনসমূহ -->
-                                <div class="d-flex gap-2">
-                                    <a :href="`tel:${alumnus.phone}`" class="btn btn-call flex-grow-1 text-center py-2">
-                                        <i class="fas fa-phone-alt me-1"></i> কল করুন
-                                    </a>
-                                    <a v-if="alumnus.email" :href="`mailto:${alumnus.email}`" class="btn btn-email px-3 py-2">
-                                        <i class="fas fa-envelope"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer-custom px-4 py-2 border-top bg-light bg-opacity-25 d-flex justify-content-between align-items-center">
-                            <span class="text-muted small"><i class="far fa-calendar-alt me-1"></i> নিবন্ধন:</span>
-                            <span class="text-dark small fw-medium">{{ toBengaliDigits(new Date(alumnus.created_at).toLocaleDateString('bn-BD')) }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- কোন ফলাফল না পাওয়া গেলে -->
-                <div v-if="alumni.data.length === 0" class="col-12">
-                    <div class="glass-card text-center py-5">
-                        <div class="p-5">
-                            <i class="fas fa-search-minus fs-1 mb-3 text-muted"></i>
-                            <h4 class="fw-bold text-muted">কোনো বন্ধু পাওয়া যায়নি</h4>
-                            <p class="text-muted mb-0">অনুগ্রহ করে ভিন্ন নাম বা ব্যাচ দিয়ে পুনরায় অনুসন্ধান করুন।</p>
-                        </div>
-                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -435,101 +412,69 @@ const showAccountsMessage = () => {
     color: #fff;
 }
 
-/* Friend Card Modern Styling */
-.friend-card-modern {
+/* Friends Table Styling */
+.friends-table-wrapper {
     background: #ffffff;
-    border-radius: 24px;
+    border-radius: 20px;
     border: 1px solid #E9EEF3;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(15, 76, 92, 0.05);
 }
-
-.friend-card-modern:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 35px -10px rgba(15, 76, 92, 0.15) !important;
-    border-color: rgba(212, 175, 55, 0.4);
+.friends-table th {
+    background-color: var(--diamond-blue) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    padding: 18px 24px;
+    border: none;
+    font-size: 0.95rem;
 }
-
-.friend-avatar {
-    width: 60px;
-    height: 60px;
+.friends-table th:first-child {
+    border-top-left-radius: 20px;
+}
+.friends-table th:last-child {
+    border-top-right-radius: 20px;
+}
+.friends-table td {
+    padding: 16px 24px;
+    vertical-align: middle;
+    color: #334155;
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 0.95rem;
+}
+.friend-row {
+    transition: background-color 0.2s ease;
+}
+.friend-row:hover {
+    background-color: rgba(15, 76, 92, 0.02);
+}
+.friend-row:last-child td {
+    border-bottom: none;
+}
+.friend-avatar-sm {
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--diamond-blue) 0%, #1B6B82 100%);
-    border: 2px solid var(--diamond-gold);
-    font-family: system-ui, -apple-system, sans-serif;
-    font-size: 1.2rem;
+    border: 1.5px solid var(--diamond-gold);
+    color: #ffffff;
 }
-
+.friend-name-table {
+    font-family: 'Kalpurush', 'Hind Siliguri', sans-serif;
+    color: #0F4C5C;
+}
+.col-serial {
+    width: 100px;
+}
+.serial-cell {
+    color: #64748B !important;
+}
+.address-cell {
+    color: #475569;
+}
 .badge-batch {
     background-color: rgba(212, 175, 55, 0.12) !important;
     color: #9A7B1C !important;
     border: 1px solid rgba(212, 175, 55, 0.25);
     font-size: 0.82rem;
-}
-
-.friend-name {
-    font-family: 'Kalpurush', 'Hind Siliguri', serif;
-    font-size: 1.25rem;
-    color: #0F4C5C !important;
-}
-
-.address-text {
-    font-size: 0.88rem;
-    color: #475569;
-}
-
-.icon-wrap {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background-color: rgba(15, 76, 92, 0.05);
-    color: var(--diamond-blue);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    flex-shrink: 0;
-}
-
-.contact-link {
-    transition: color 0.2s ease;
-}
-.contact-link:hover {
-    color: var(--diamond-gold) !important;
-}
-
-.btn-call {
-    background-color: var(--diamond-blue);
-    color: #fff;
-    border-radius: 50px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    border: 1px solid var(--diamond-blue);
-    transition: all 0.2s ease;
-}
-.btn-call:hover {
-    background-color: var(--diamond-gold);
-    border-color: var(--diamond-gold);
-    color: #0F4C5C;
-}
-
-.btn-email {
-    background-color: transparent;
-    color: var(--diamond-blue);
-    border: 1px solid rgba(15, 76, 92, 0.2);
-    border-radius: 50px;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-}
-.btn-email:hover {
-    background-color: rgba(15, 76, 92, 0.06);
-    border-color: var(--diamond-blue);
-}
-
-.card-footer-custom {
-    background-color: #F8FAFC;
-    font-size: 0.8rem;
 }
 
 /* Pagination Overrides */

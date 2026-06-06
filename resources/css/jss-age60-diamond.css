@@ -5,7 +5,7 @@
     --diamond-light: #EFF3F6;
     --shadow-diamond: 0 20px 35px -10px rgba(0, 0, 0, 0.1);
     --header-height: 118px;
-    font-family: 'Hind Siliguri', sans-serif;
+    font-family: 'Kalpurush', 'Hind Siliguri', sans-serif;
     background: #F8F9FC;
     color: #1E293B;
     overflow-x: hidden;
@@ -407,7 +407,7 @@
     border: 1px solid #dee2e6;
     background-color: #fff;
     color: #1E293B;
-    font-family: 'Hind Siliguri', sans-serif;
+    font-family: 'Kalpurush', 'Hind Siliguri', sans-serif;
     font-size: 1rem;
     line-height: 1.5;
     appearance: none;

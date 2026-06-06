@@ -260,7 +260,7 @@ onUnmounted(() => {
 
 /* Custom styling to ensure proper layout and font */
 body.layout-fixed {
-    font-family: 'Hind Siliguri', 'Kalpurush', sans-serif !important;
+    font-family: 'Kalpurush', 'Hind Siliguri', sans-serif !important;
 }
 
 .brand-link:hover {
