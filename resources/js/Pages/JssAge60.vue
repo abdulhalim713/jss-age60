@@ -81,17 +81,32 @@ const selectedMember = ref(null);
 const feedbackForm = ref({ name: '', contact: '', type: 'suggestion', message: '' });
 const feedbackSuccess = ref('');
 
+const isSubmittingFeedback = ref(false);
 const submitFeedback = () => {
-    feedbackSuccess.value = `<i class="fas fa-check-circle"></i> আপনার মতামত/অভিযোগ সফলভাবে গ্রহণ করা হয়েছে। ধন্যবাদ!`;
-    setTimeout(() => {
-        feedbackSuccess.value = '';
-        const modalEl = document.getElementById('feedbackModal');
-        if (modalEl) {
-            const modal = window.bootstrap.Modal.getInstance(modalEl);
-            if (modal) modal.hide();
+    if (isSubmittingFeedback.value) return;
+    isSubmittingFeedback.value = true;
+    router.post(route('feedback.store'), feedbackForm.value, {
+        preserveScroll: true,
+        onSuccess: () => {
+            feedbackSuccess.value = `<i class="fas fa-check-circle"></i> আপনার মতামত/অভিযোগ সফলভাবে গ্রহণ করা হয়েছে। ধন্যবাদ!`;
+            setTimeout(() => {
+                feedbackSuccess.value = '';
+                const modalEl = document.getElementById('feedbackModal');
+                if (modalEl) {
+                    const modal = window.bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                }
+                feedbackForm.value = { name: '', contact: '', type: 'suggestion', message: '' };
+            }, 2500);
+        },
+        onError: (errors) => {
+            const errorMsgs = Object.values(errors).join('\n');
+            alert('ভুল হয়েছে:\n' + errorMsgs);
+        },
+        onFinish: () => {
+            isSubmittingFeedback.value = false;
         }
-        feedbackForm.value = { name: '', contact: '', type: 'suggestion', message: '' };
-    }, 2500);
+    });
 };
 
 const showAccountsMessage = () => {
@@ -277,6 +292,15 @@ onUnmounted(() => {
             rel="stylesheet"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+        <meta name="description" content="১৯৬৭-২০২৭: জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়ের ৬০ বছর গৌরবময় পথচলার হীরক জয়ন্তী উদযাপন। প্রাক্তন শিক্ষার্থীদের পুনর্মিলনী নিবন্ধন ও উৎসবের বিস্তারিত সূচি।" />
+        <meta property="og:title" content="হীরক জয়ন্তী | জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়" />
+        <meta property="og:description" content="১৯৬৭-২০২৭: জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়ের ৬০ বছর গৌরবময় পথচলার হীরক জয়ন্তী উদযাপন। প্রাক্তন শিক্ষার্থীদের পুনর্মিলনী নিবন্ধন ও উৎসবের বিস্তারিত সূচি।" />
+        <meta property="og:image" content="/images/hirak-jayanti-logo.png" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="হীরক জয়ন্তী | জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়" />
+        <meta name="twitter:description" content="১৯৬৭-২০২৭: জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়ের ৬০ বছর গৌরবময় পথচলার হীরক জয়ন্তী উদযাপন। প্রাক্তন শিক্ষার্থীদের পুনর্মিলনী নিবন্ধন ও উৎসবের বিস্তারিত সূচি।" />
+        <meta name="twitter:image" content="/images/hirak-jayanti-logo.png" />
     </Head>
 
     <div id="app" class="jss-age60-root">
@@ -838,8 +862,9 @@ onUnmounted(() => {
                                 <textarea v-model="feedbackForm.message" class="form-control rounded-4 bg-light bg-opacity-10 border-light border-opacity-25 text-white px-3 py-2" rows="4" required></textarea>
                             </div>
                             <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-diamond px-5 py-2">
-                                    <i class="fas fa-paper-plane me-2"></i> সাবমিট করুন
+                                <button type="submit" class="btn btn-diamond px-5 py-2" :disabled="isSubmittingFeedback">
+                                    <span v-if="isSubmittingFeedback" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    <i v-else class="fas fa-paper-plane me-2"></i> সাবমিট করুন
                                 </button>
                             </div>
                         </form>

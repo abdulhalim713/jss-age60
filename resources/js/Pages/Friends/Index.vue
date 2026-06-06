@@ -45,17 +45,32 @@ watch([search, batch], () => {
     debounceTimer = setTimeout(() => applyFilters(), 350);
 });
 
+const isSubmittingFeedback = ref(false);
 const submitFeedback = () => {
-    feedbackSuccess.value = `<i class="fas fa-check-circle"></i> আপনার মতামত/অভিযোগ সফলভাবে গ্রহণ করা হয়েছে। ধন্যবাদ!`;
-    setTimeout(() => {
-        feedbackSuccess.value = '';
-        const modalEl = document.getElementById('feedbackModal');
-        if (modalEl) {
-            const modal = window.bootstrap.Modal.getInstance(modalEl);
-            if (modal) modal.hide();
+    if (isSubmittingFeedback.value) return;
+    isSubmittingFeedback.value = true;
+    router.post(route('feedback.store'), feedbackForm.value, {
+        preserveScroll: true,
+        onSuccess: () => {
+            feedbackSuccess.value = `<i class="fas fa-check-circle"></i> আপনার মতামত/অভিযোগ সফলভাবে গ্রহণ করা হয়েছে। ধন্যবাদ!`;
+            setTimeout(() => {
+                feedbackSuccess.value = '';
+                const modalEl = document.getElementById('feedbackModal');
+                if (modalEl) {
+                    const modal = window.bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                }
+                feedbackForm.value = { name: '', contact: '', type: 'suggestion', message: '' };
+            }, 2500);
+        },
+        onError: (errors) => {
+            const errorMsgs = Object.values(errors).join('\n');
+            alert('ভুল হয়েছে:\n' + errorMsgs);
+        },
+        onFinish: () => {
+            isSubmittingFeedback.value = false;
         }
-        feedbackForm.value = { name: '', contact: '', type: 'suggestion', message: '' };
-    }, 2500);
+    });
 };
 
 const showAccountsMessage = () => {
@@ -71,6 +86,15 @@ const showAccountsMessage = () => {
             rel="stylesheet"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+        <meta name="description" content="জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়ের হীরক জয়ন্তী ২০২৭ উপলক্ষে নিবন্ধিত প্রাক্তন বন্ধুদের তালিকা ও অনুসন্ধান প্রাঙ্গণ।" />
+        <meta property="og:title" content="বন্ধু তালিকা | জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়" />
+        <meta property="og:description" content="জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়ের হীরক জয়ন্তী ২০২৭ উপলক্ষে নিবন্ধিত প্রাক্তন বন্ধুদের তালিকা ও অনুসন্ধান প্রাঙ্গণ।" />
+        <meta property="og:image" content="/images/hirak-jayanti-logo.png" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="বন্ধু তালিকা | জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়" />
+        <meta name="twitter:description" content="জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়ের হীরক জয়ন্তী ২০২৭ উপলক্ষে নিবন্ধিত প্রাক্তন বন্ধুদের তালিকা ও অনুসন্ধান প্রাঙ্গণ।" />
+        <meta name="twitter:image" content="/images/hirak-jayanti-logo.png" />
     </Head>
 
     <div id="app" class="jss-age60-root">
@@ -348,8 +372,9 @@ const showAccountsMessage = () => {
                                 <textarea v-model="feedbackForm.message" class="form-control rounded-4 bg-light bg-opacity-10 border-light border-opacity-25 text-white px-3 py-2" rows="4" required></textarea>
                             </div>
                             <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-diamond px-5 py-2">
-                                    <i class="fas fa-paper-plane me-2"></i> সাবমিট করুন
+                                <button type="submit" class="btn btn-diamond px-5 py-2" :disabled="isSubmittingFeedback">
+                                    <span v-if="isSubmittingFeedback" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    <i v-else class="fas fa-paper-plane me-2"></i> সাবমিট করুন
                                 </button>
                             </div>
                         </form>

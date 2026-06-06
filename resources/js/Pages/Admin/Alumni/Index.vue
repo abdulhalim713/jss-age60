@@ -1,6 +1,6 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 
 const props = defineProps({

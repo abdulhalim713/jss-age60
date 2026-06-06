@@ -19,6 +19,8 @@ use App\Models\MediaGallery;
 use App\Models\Setting;
 use App\Models\Sponsor;
 use App\Http\Controllers\Admin\SponsorController;
+use App\Http\Controllers\Admin\FeedbackController;
+use App\Http\Controllers\EssayController;
 
 
 Route::get('/', function () {
@@ -34,6 +36,11 @@ Route::get('/', function () {
     $sponsors      = Sponsor::orderBy('sort_order')->get();
 
     return Inertia::render('JssAge60', [
+        'seo' => [
+            'title' => 'হীরক জয়ন্তী | জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়',
+            'description' => '১৯৬৭-২০২৭: জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়ের ৬০ বছর গৌরবময় পথচলার হীরক জয়ন্তী উদযাপন। প্রাক্তন শিক্ষার্থীদের পুনর্মিলনী নিবন্ধন ও উৎসবের বিস্তারিত সূচি।',
+            'image' => asset('images/hirak-jayanti-logo.png'),
+        ],
         'initialAlumni'         => $approvedAlumni,
         'initialRegisteredCount'=> $totalCount,
         'approvedCount'         => $approvedCount,
@@ -66,6 +73,11 @@ Route::get('/friends', function (Request $request) {
     $batches = Alumni::select('batch')->distinct()->orderBy('batch')->pluck('batch')->toArray();
 
     return Inertia::render('Friends/Index', [
+        'seo' => [
+            'title' => 'বন্ধু তালিকা | জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়',
+            'description' => 'জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়ের হীরক জয়ন্তী ২০২৭ উপলক্ষে নিবন্ধিত প্রাক্তন বন্ধুদের তালিকা ও অনুসন্ধান প্রাঙ্গণ।',
+            'image' => asset('images/hirak-jayanti-logo.png'),
+        ],
         'alumni' => $alumni,
         'filters' => [
             'search' => $request->input('search', ''),
@@ -76,6 +88,13 @@ Route::get('/friends', function (Request $request) {
 })->name('friends.index');
 
 Route::post('/alumni/register', [AlumniController::class, 'publicRegister'])->name('alumni.register');
+Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+
+// Public essay routes
+Route::get('/essays', [EssayController::class, 'publicIndex'])->name('essays.index');
+Route::get('/essays/write', [EssayController::class, 'publicCreate'])->name('essays.create');
+Route::post('/essays', [EssayController::class, 'publicStore'])->name('essays.store');
+Route::get('/essays/{essay}', [EssayController::class, 'publicShow'])->name('essays.show');
 
 Route::get('/dashboard', [AlumniController::class, 'adminDashboard'])
     ->middleware(['auth', 'verified'])
@@ -87,6 +106,15 @@ Route::middleware('auth')->group(function () {
     Route::put('/admin/alumni/{alumnus}', [AlumniController::class, 'update'])->name('admin.alumni.update');
     Route::delete('/admin/alumni/{alumnus}', [AlumniController::class, 'destroy'])->name('admin.alumni.destroy');
     Route::patch('/admin/alumni/{alumnus}/status', [AlumniController::class, 'updateStatus'])->name('admin.alumni.status');
+
+    // Feedback management
+    Route::get('/admin/feedback', [FeedbackController::class, 'index'])->name('admin.feedback.index');
+    Route::delete('/admin/feedback/{feedback}', [FeedbackController::class, 'destroy'])->name('admin.feedback.destroy');
+
+    // Essay management
+    Route::get('/admin/essays', [EssayController::class, 'index'])->name('admin.essays.index');
+    Route::patch('/admin/essays/{essay}/status', [EssayController::class, 'updateStatus'])->name('admin.essays.status');
+    Route::delete('/admin/essays/{essay}', [EssayController::class, 'destroy'])->name('admin.essays.destroy');
 
     // Hero settings management
     Route::resource('/admin/hero', HeroSettingController::class)->names('admin.hero');

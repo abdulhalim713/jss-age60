@@ -156,6 +156,16 @@ onUnmounted(() => {
                                 <span>ইউজার ব্যবস্থাপনা</span>
                             </Link>
                         </li>
+                        <li class="nav-item">
+                            <Link 
+                                :href="route('admin.feedback.index')" 
+                                class="nav-link px-3 py-2 rounded-2 text-decoration-none d-flex align-items-center gap-3 text-white-50" 
+                                :class="{ 'active bg-primary text-white': route().current('admin.feedback.index') }"
+                            >
+                                <i class="nav-icon fas fa-comment-dots"></i>
+                                <span>অভিযোগ ও পরামর্শ</span>
+                            </Link>
+                        </li>
 
                         <!-- সাইটের বিভাজন লাইন -->
                         <li class="nav-item pt-2 pb-1">
