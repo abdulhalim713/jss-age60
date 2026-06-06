@@ -3,15 +3,20 @@ name: Deploy to Specific cPanel Folder
 on:
   push:
     branches:
-      - main # আপনার মেইন ব্রাঞ্চের নাম (যেমন: main বা master)
+      - main
 
 jobs:
   web-deploy:
     name: Deploy Website
     runs-on: ubuntu-latest
+    
+    # গিটহাবের ওয়ার্নিং এড়াতে Node.js 24 এনভায়রনমেন্ট ফোর্স করা
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     steps:
     - name: Get latest code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4 # v3 থেকে v4 এ আপডেট করা হয়েছে
     
     - name: Sync files to cPanel Subdomain
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -19,9 +24,5 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./ # গিটহাবের রুট ডিরেক্টরি থেকে সব ফাইল যাবে
-        
-        # গুরুত্বপূর্ণ অংশ: 
-        # স্টেপ ১-এ FTP ডিরেক্টরি যদি 'public_html/age60.myjss.edu.bd' দেওয়া থাকে, তবে এখানে শুধু './' দিলেই হবে।
-        # আর FTP ডিরেক্টরি যদি একদম মেইন রুট হয়, তবে নিচে এভাবে লিখুন:
-        server-dir: ./public_html/age60.myjss.edu.bd/
+        local-dir: ./
+        server-dir: ./ # FTP অ্যাকাউন্টের রুট ডিরেক্টরি অনুযায়ী (যেমন: public_html/age60.myjss.edu.bd/)
