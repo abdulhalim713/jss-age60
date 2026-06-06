@@ -6,14 +6,20 @@ use App\Http\Controllers\Admin\HeroSettingController;
 use App\Http\Controllers\Admin\CommitteeMemberController;
 use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Illuminate\Http\Request;
 use App\Models\Alumni;
 use App\Models\HeroSetting;
 use App\Models\CommitteeMember;
 use App\Models\MediaGallery;
 use App\Models\Setting;
+use App\Models\Sponsor;
+use App\Http\Controllers\Admin\SponsorController;
+
 
 Route::get('/', function () {
     $approvedAlumni = Alumni::where('status', 'approved')
@@ -25,6 +31,7 @@ Route::get('/', function () {
     $committee     = CommitteeMember::orderBy('sort_order')->get();
     $gallery       = MediaGallery::orderBy('sort_order')->get();
     $eventDate     = Setting::get('event_date', '2027-04-10');
+    $sponsors      = Sponsor::orderBy('sort_order')->get();
 
     return Inertia::render('JssAge60', [
         'initialAlumni'         => $approvedAlumni,
@@ -34,8 +41,39 @@ Route::get('/', function () {
         'committeeMembers'      => $committee,
         'galleryItems'          => $gallery,
         'eventDate'             => $eventDate,
+        'sponsors'              => $sponsors,
     ]);
 });
+
+// Public friend list page with simple filters
+Route::get('/friends', function (Request $request) {
+    $query = Alumni::query()->where('status', 'approved');
+
+    if ($request->filled('search')) {
+        $q = $request->input('search');
+        $query->where(function ($sub) use ($q) {
+            $sub->where('name', 'like', "%{$q}%")
+                ->orWhere('phone', 'like', "%{$q}%")
+                ->orWhere('email', 'like', "%{$q}%");
+        });
+    }
+
+    if ($request->filled('batch')) {
+        $query->where('batch', $request->input('batch'));
+    }
+
+    $alumni = $query->orderBy('name')->paginate(15)->withQueryString();
+    $batches = Alumni::select('batch')->distinct()->orderBy('batch')->pluck('batch')->toArray();
+
+    return Inertia::render('Friends/Index', [
+        'alumni' => $alumni,
+        'filters' => [
+            'search' => $request->input('search', ''),
+            'batch' => $request->input('batch', ''),
+        ],
+        'batches' => $batches,
+    ]);
+})->name('friends.index');
 
 Route::post('/alumni/register', [AlumniController::class, 'publicRegister'])->name('alumni.register');
 
@@ -56,6 +94,9 @@ Route::middleware('auth')->group(function () {
     // Gallery management
     Route::resource('/admin/gallery', GalleryController::class)->names('admin.gallery');
 
+    // Sponsors management
+    Route::resource('/admin/sponsors', SponsorController::class)->names('admin.sponsors');
+
     // Committee members management
     Route::get('/admin/committee', [CommitteeMemberController::class, 'index'])->name('admin.committee.index');
     Route::get('/admin/committee/create', [CommitteeMemberController::class, 'create'])->name('admin.committee.create');
@@ -72,6 +113,9 @@ Route::middleware('auth')->group(function () {
     // Settings
     Route::get('/admin/settings', [SettingController::class, 'edit'])->name('admin.settings.edit');
     Route::put('/admin/settings', [SettingController::class, 'update'])->name('admin.settings.update');
+
+    // User management
+    Route::resource('/admin/users', UserController::class)->names('admin.users');
 });
 
 require __DIR__.'/auth.php';

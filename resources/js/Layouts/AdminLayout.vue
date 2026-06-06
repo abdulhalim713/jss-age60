@@ -146,6 +146,16 @@ onUnmounted(() => {
                                 <span>নিবন্ধিত অ্যালামনাই</span>
                             </Link>
                         </li>
+                        <li class="nav-item">
+                            <Link 
+                                :href="route('admin.users.index')" 
+                                class="nav-link px-3 py-2 rounded-2 text-decoration-none d-flex align-items-center gap-3 text-white-50" 
+                                :class="{ 'active bg-primary text-white': route().current('admin.users.*') }"
+                            >
+                                <i class="nav-icon fas fa-users-cog"></i>
+                                <span>ইউজার ব্যবস্থাপনা</span>
+                            </Link>
+                        </li>
 
                         <!-- সাইটের বিভাজন লাইন -->
                         <li class="nav-item pt-2 pb-1">
@@ -182,6 +192,17 @@ onUnmounted(() => {
                             >
                                 <i class="nav-icon fas fa-users-gear"></i>
                                 <span>কমিটি ব্যবস্থাপনা</span>
+                            </Link>
+                        </li>
+
+                        <li class="nav-item">
+                            <Link 
+                                :href="route('admin.sponsors.index')" 
+                                class="nav-link px-3 py-2 rounded-2 text-decoration-none d-flex align-items-center gap-3 text-white-50" 
+                                :class="{ 'active bg-warning text-dark': route().current('admin.sponsors.*') }"
+                            >
+                                <i class="nav-icon fas fa-hand-holding-usd"></i>
+                                <span>স্পন্সর ব্যবস্থাপনা</span>
                             </Link>
                         </li>
 

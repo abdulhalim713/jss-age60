@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
     initialAlumni: Array,
@@ -10,6 +10,7 @@ const props = defineProps({
     committeeMembers: Array,
     galleryItems: Array,
     eventDate: String,
+    sponsors: Array,
 });
 import '@hixbe/kalpurush';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -20,11 +21,7 @@ import AOS from 'aos';
 import 'lightbox2/dist/css/lightbox.min.css';
 import '../lightbox-init.js';
 import '../../css/jss-age60-diamond.css';
-import $ from 'jquery';
-import select2 from 'select2';
-import 'select2/dist/css/select2.min.css';
 
-select2(window, $);
 
 const logoUrl = '/images/hirak-jayanti-logo.png';
 
@@ -59,7 +56,7 @@ const getImageUrl = (path) => {
     return `/storage/${path}`;
 };
 
-const batchSelectRef = ref(null);
+
 
 const targetDate = computed(() => {
     if (props.eventDate) {
@@ -167,12 +164,17 @@ const galleryVideos = computed(() => {
     ];
 });
 
-const sponsors = ref([
-    { name: 'সোনালী ব্যাংক', logo: 'https://placehold.co/200x80/D4AF37/0F4C5C?text=Sonali+Bank' },
-    { name: 'একুশে শিক্ষা', logo: 'https://placehold.co/200x80/0F4C5C/D4AF37?text=Ekushe+Trust' },
-    { name: 'মেহেরপুর শিল্পগোষ্ঠী', logo: 'https://placehold.co/200x80/1B6B82/D4AF37?text=Meherpur+Group' },
-    { name: 'ডিজিটাল বাংলা', logo: 'https://placehold.co/200x80/D4AF37/1B6B82?text=Digital+Bangla' },
-]);
+const sponsorsList = computed(() => {
+    if (props.sponsors && props.sponsors.length > 0) {
+        return props.sponsors;
+    }
+    return [
+        { name: 'সোনালী ব্যাংক', logo: 'https://placehold.co/200x80/D4AF37/0F4C5C?text=Sonali+Bank' },
+        { name: 'একুশে শিক্ষা', logo: 'https://placehold.co/200x80/0F4C5C/D4AF37?text=Ekushe+Trust' },
+        { name: 'মেহেরপুর শিল্পগোষ্ঠী', logo: 'https://placehold.co/200x80/1B6B82/D4AF37?text=Meherpur+Group' },
+        { name: 'ডিজিটাল বাংলা', logo: 'https://placehold.co/200x80/D4AF37/1B6B82?text=Digital+Bangla' },
+    ];
+});
 
 let countdownInterval = null;
 
@@ -256,18 +258,7 @@ onMounted(() => {
     AOS.init({ duration: 800, once: true });
     window.addEventListener('scroll', onScroll);
 
-    // Select2 ইনিশিয়ালাইজ
-    nextTick(() => {
-        if (batchSelectRef.value) {
-            $(batchSelectRef.value).select2({
-                placeholder: 'ব্যাচ নির্বাচন করুন',
-                allowClear: true,
-                width: '100%',
-            }).on('change', function () {
-                form.value.batch = $(this).val();
-            });
-        }
-    });
+
 });
 
 onUnmounted(() => {
@@ -302,7 +293,6 @@ onUnmounted(() => {
                         </a>
                     </div>
                     <div class="topbar-actions">
-                        <Link href="/register" class="btn-topbar btn-topbar-gold">রেজিস্টার</Link>
                         <Link href="/login" class="btn-topbar">লগইন</Link>
                     </div>
                 </div>
@@ -355,7 +345,10 @@ onUnmounted(() => {
                                 </ul>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#register" @click.prevent="scrollTo('register'); isMenuOpen = false;">বন্ধু তালিকা</a>
+                                <a class="nav-link" href="#register" @click.prevent="scrollTo('register'); isMenuOpen = false;">স্মৃতিচারণ প্রবন্ধ</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/friends">বন্ধু তালিকা</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#feedbackModal" @click="isMenuOpen = false">অভিযোগ/পরামর্শ</a>
@@ -616,28 +609,18 @@ onUnmounted(() => {
                         </a>
                     </div>
                 </div>
-                <div class="text-center mt-5">
+                <div class="text-center mt-5" v-if="galleryVideos && galleryVideos.length > 0">
                     <h4 class="gold-text"><i class="fas fa-video"></i> ভিডিও বার্তা</h4>
-                    <div class="row mt-3">
-                        <div class="col-md-6">
-                            <div class="ratio ratio-16x9 rounded-4 overflow-hidden">
+                    <div class="row mt-3 g-4 justify-content-center">
+                        <div v-for="(vid, idx) in galleryVideos" :key="idx" class="col-md-6">
+                            <div class="ratio ratio-16x9 rounded-4 overflow-hidden shadow-sm">
                                 <iframe
-                                    src="https://www.youtube.com/embed/9bZkp7q19f0?si=diamond"
-                                    title="বিদ্যালয়ের ইতিহাস"
+                                    :src="vid.video_url"
+                                    :title="vid.title"
                                     allowfullscreen
                                 ></iframe>
                             </div>
-                            <p>ষাট বছরের গৌরবগাথা</p>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="ratio ratio-16x9 rounded-4 overflow-hidden">
-                                <iframe
-                                    src="https://www.youtube.com/embed/tgbNymZ7vqY?si=alumni60"
-                                    title="প্রাক্তনদের শুভেচ্ছা"
-                                    allowfullscreen
-                                ></iframe>
-                            </div>
-                            <p>প্রাক্তন শিক্ষার্থীদের শুভেচ্ছা</p>
+                            <p class="mt-2">{{ vid.title }}</p>
                         </div>
                     </div>
                 </div>
@@ -652,8 +635,11 @@ onUnmounted(() => {
                 </h3>
                 <p class="text-center">হীরক জয়ন্তী আয়োজনে পাশে থাকা প্রতিষ্ঠান</p>
                 <div class="row align-items-center justify-content-center g-4 mt-2">
-                    <div v-for="sp in sponsors" :key="sp.name" class="col-md-3 col-6 text-center">
-                        <img :src="sp.logo" class="sponsor-logo img-fluid" :alt="sp.name" />
+                    <div v-for="sp in sponsorsList" :key="sp.name" class="col-md-3 col-6 text-center">
+                        <a v-if="sp.link" :href="sp.link" target="_blank">
+                            <img :src="getImageUrl(sp.logo)" class="sponsor-logo img-fluid" :alt="sp.name" />
+                        </a>
+                        <img v-else :src="getImageUrl(sp.logo)" class="sponsor-logo img-fluid" :alt="sp.name" />
                     </div>
                 </div>
             </div>
@@ -681,10 +667,11 @@ onUnmounted(() => {
                     </div>
                     <div class="col-md-6">
                         <select
-                            ref="batchSelectRef"
-                            class="form-control batch-select2"
+                            v-model="form.batch"
+                            class="form-control form-select-pill p-3"
+                            required
                         >
-                            <option value=""></option>
+                            <option value="" disabled>ব্যাচ নির্বাচন করুন</option>
                             <option v-for="yr in batchYears" :key="yr.value" :value="yr.value">
                                 {{ yr.label }}
                             </option>
@@ -761,7 +748,7 @@ onUnmounted(() => {
                             <a href="#committee" class="text-white-50 text-decoration-none" @click.prevent="scrollTo('committee')">কমিটি</a>
                         </p>
                         <p>
-                            <a href="#register" class="text-white-50 text-decoration-none" @click.prevent="scrollTo('register')">নিবন্ধন</a>
+                            <a href="#register" class="text-white-50 text-decoration-none" @click.prevent="scrollTo('register')">স্মৃতিচারণ প্রবন্ধ</a>
                         </p>
                     </div>
                     <div class="col-md-4">
