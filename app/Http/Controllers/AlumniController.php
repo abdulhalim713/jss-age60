@@ -27,6 +27,9 @@ class AlumniController extends Controller
 
         Alumni::create($validated);
 
+        $smsMessage = 'অভিনন্দন! জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়ের ৬০ বছর পূর্তি (হীরক জয়ন্তী) উৎসবে আপনার তথ্য জমা সফল হয়েছে। শৈশবের স্মৃতি আর বন্ধুদের আড্ডায় মেতে উঠতে প্রস্তুত হোন। বিস্তারিত: https://age60.myjss.edu.bd';
+        \App\Services\SmsService::send($validated['phone'], $smsMessage);
+
         return redirect()->back()->with('success', 'ধন্যবাদ! আপনার নিবন্ধন সফলভাবে জমা হয়েছে। এডমিন অনুমোদনের পর তালিকাভুক্ত হবে।');
     }
 
