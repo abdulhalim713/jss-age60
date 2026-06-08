@@ -218,6 +218,17 @@ onUnmounted(() => {
 
                         <li class="nav-item">
                             <Link 
+                                :href="route('admin.faq.index')" 
+                                class="nav-link px-3 py-2 rounded-2 text-decoration-none d-flex align-items-center gap-3 text-white-50" 
+                                :class="{ 'active bg-warning text-dark': route().current('admin.faq.*') }"
+                            >
+                                <i class="nav-icon fas fa-question-circle"></i>
+                                <span>সচরাচর জিজ্ঞাসা (FAQ)</span>
+                            </Link>
+                        </li>
+
+                        <li class="nav-item">
+                            <Link 
                                 :href="route('admin.settings.edit')" 
                                 class="nav-link px-3 py-2 rounded-2 text-decoration-none d-flex align-items-center gap-3 text-white-50" 
                                 :class="{ 'active bg-warning text-dark': route().current('admin.settings.*') }"

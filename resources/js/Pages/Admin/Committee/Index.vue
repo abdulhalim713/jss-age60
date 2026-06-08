@@ -56,6 +56,7 @@ const deleteMember = (id, name) => {
                                 <th style="width:80px;">ছবি</th>
                                 <th>নাম</th>
                                 <th>পদবি / ভূমিকা</th>
+                                <th>ব্যাচ</th>
                                 <th>মোবাইল নম্বর</th>
                                 <th>ঠিকানা</th>
                                 <th class="text-center" style="width:140px;">কার্যক্রম</th>
@@ -83,6 +84,12 @@ const deleteMember = (id, name) => {
                                 </td>
                                 <td>
                                     <span class="badge bg-light text-dark border">{{ member.role }}</span>
+                                </td>
+                                <td>
+                                    <span v-if="member.batch" class="badge bg-primary-subtle text-primary border">
+                                        <i class="fas fa-graduation-cap me-1"></i>{{ member.batch }}
+                                    </span>
+                                    <span v-else class="text-muted small">—</span>
                                 </td>
                                 <td>
                                     <span>{{ member.mobile || '—' }}</span>

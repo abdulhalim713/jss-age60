@@ -1,8 +1,5 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 
 defineProps({
@@ -23,90 +20,97 @@ const form = useForm({
 </script>
 
 <template>
-    <section>
-        <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                Profile Information
-            </h2>
+    <form @submit.prevent="form.patch(route('profile.update'))">
+        <!-- Name Field -->
+        <div class="mb-4">
+            <label for="name" class="form-label fw-semibold">
+                <i class="fas fa-user me-1 text-secondary"></i> নাম
+                <span class="text-danger">*</span>
+            </label>
+            <input
+                id="name"
+                type="text"
+                v-model="form.name"
+                required
+                autofocus
+                autocomplete="name"
+                placeholder="আপনার পূর্ণ নাম লিখুন"
+                class="form-control rounded-3"
+                :class="{ 'is-invalid': form.errors.name }"
+            />
+            <InputError :message="form.errors.name" class="invalid-feedback d-block" />
+        </div>
 
-            <p class="mt-1 text-sm text-gray-600">
-                Update your account's profile information and email address.
-            </p>
-        </header>
+        <!-- Email Field -->
+        <div class="mb-4">
+            <label for="email" class="form-label fw-semibold">
+                <i class="fas fa-envelope me-1 text-secondary"></i> ইমেইল ঠিকানা
+                <span class="text-danger">*</span>
+            </label>
+            <input
+                id="email"
+                type="email"
+                v-model="form.email"
+                required
+                autocomplete="username"
+                placeholder="example@mail.com"
+                class="form-control rounded-3"
+                :class="{ 'is-invalid': form.errors.email }"
+            />
+            <InputError :message="form.errors.email" class="invalid-feedback d-block" />
+        </div>
 
-        <form
-            @submit.prevent="form.patch(route('profile.update'))"
-            class="mt-6 space-y-6"
+        <!-- Email Verification Notice -->
+        <div v-if="mustVerifyEmail && user.email_verified_at === null" class="alert alert-warning rounded-3 mb-4 py-2 small">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            আপনার ইমেইল ঠিকানাটি ভেরিফাই করা হয়নি।
+            <Link
+                :href="route('verification.send')"
+                method="post"
+                as="button"
+                class="btn btn-link btn-sm p-0 ms-1 fw-semibold text-warning"
+            >
+                ভেরিফিকেশন ইমেইল পুনরায় পাঠান
+            </Link>
+        </div>
+
+        <div
+            v-show="status === 'verification-link-sent'"
+            class="alert alert-success rounded-3 mb-4 py-2 small"
         >
-            <div>
-                <InputLabel for="name" value="Name" />
+            <i class="fas fa-check-circle me-2"></i>
+            আপনার ইমেইলে একটি নতুন ভেরিফিকেশন লিঙ্ক পাঠানো হয়েছে।
+        </div>
 
-                <TextInput
-                    id="name"
-                    type="text"
-                    class="mt-1 block w-full"
-                    v-model="form.name"
-                    required
-                    autofocus
-                    autocomplete="name"
-                />
+        <!-- Submit -->
+        <div class="d-flex align-items-center gap-3">
+            <button
+                type="submit"
+                class="btn px-5 fw-semibold"
+                :disabled="form.processing"
+                style="background:#0F4C5C; color:#fff; border:none;"
+            >
+                <span v-if="form.processing">
+                    <i class="fas fa-spinner fa-spin me-1"></i> সংরক্ষণ হচ্ছে...
+                </span>
+                <span v-else>
+                    <i class="fas fa-save me-1"></i> সংরক্ষণ করুন
+                </span>
+            </button>
 
-                <InputError class="mt-2" :message="form.errors.name" />
-            </div>
-
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div v-if="mustVerifyEmail && user.email_verified_at === null">
-                <p class="mt-2 text-sm text-gray-800">
-                    Your email address is unverified.
-                    <Link
-                        :href="route('verification.send')"
-                        method="post"
-                        as="button"
-                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        Click here to re-send the verification email.
-                    </Link>
-                </p>
-
-                <div
-                    v-show="status === 'verification-link-sent'"
-                    class="mt-2 text-sm font-medium text-green-600"
+            <Transition
+                enter-active-class="transition-opacity duration-300"
+                enter-from-class="opacity-0"
+                leave-active-class="transition-opacity duration-300"
+                leave-to-class="opacity-0"
+            >
+                <span
+                    v-if="form.recentlySuccessful"
+                    class="text-success small fw-semibold"
                 >
-                    A new verification link has been sent to your email address.
-                </div>
-            </div>
-
-            <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
-
-                <Transition
-                    enter-active-class="transition ease-in-out"
-                    enter-from-class="opacity-0"
-                    leave-active-class="transition ease-in-out"
-                    leave-to-class="opacity-0"
-                >
-                    <p
-                        v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
-                    >
-                        Saved.
-                    </p>
-                </Transition>
-            </div>
-        </form>
-    </section>
+                    <i class="fas fa-check-circle me-1"></i> সফলভাবে সংরক্ষিত হয়েছে।
+                </span>
+            </Transition>
+        </div>
+    </form>
 </template>

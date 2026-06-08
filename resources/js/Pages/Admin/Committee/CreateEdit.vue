@@ -38,7 +38,11 @@ const form = useForm({
     image:      null,
     mobile:     props.member?.mobile     ?? '',
     address:    props.member?.address    ?? '',
+    batch:      props.member?.batch      ?? '',
 });
+
+// Batch years dropdown: 1970 to 2027
+const batchYears = Array.from({ length: 2027 - 1970 + 1 }, (_, i) => String(1970 + i));
 
 const previewUrl = ref(props.member?.image ? `/storage/${props.member.image}` : null);
 
@@ -147,6 +151,21 @@ const submit = () => {
                                     placeholder="সদস্যের ঠিকানা লিখুন..."
                                 ></textarea>
                                 <div v-if="form.errors.address" class="invalid-feedback">{{ form.errors.address }}</div>
+                            </div>
+
+                            <!-- Batch Year -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">ব্যাচ নাম (পাশের সন)</label>
+                                <select
+                                    v-model="form.batch"
+                                    class="form-select rounded-3"
+                                    :class="{ 'is-invalid': form.errors.batch }"
+                                >
+                                    <option value="">— ব্যাচ নির্বাচন করুন (ঐচ্ছিক) —</option>
+                                    <option v-for="year in batchYears" :key="year" :value="year">{{ year }}</option>
+                                </select>
+                                <div class="form-text text-muted">এটি ফ্রন্টএন্ডে পদবির নিচে প্রদর্শিত হবে (যেমন: ব্যাচ-২০১২)।</div>
+                                <div v-if="form.errors.batch" class="invalid-feedback">{{ form.errors.batch }}</div>
                             </div>
 
                             <!-- Member Image Upload -->
@@ -259,7 +278,12 @@ const submit = () => {
                             <i v-else :class="form.icon + ' fa-3x mb-3'" style="color:#D4AF37;"></i>
 
                             <h6 class="mt-2 fw-semibold mb-1">{{ form.name || 'সদস্যের নাম' }}</h6>
-                            <div class="badge bg-warning text-dark mb-3 px-3 py-1">{{ form.role || 'পদবি' }}</div>
+                            <div class="badge bg-warning text-dark mb-1 px-3 py-1">{{ form.role || 'পদবি' }}</div>
+                            <div v-if="form.batch" class="text-muted small mb-3">
+                                <i class="fas fa-graduation-cap me-1"></i>
+                                ব্যাচ-{{ form.batch }}
+                            </div>
+                            <div v-else class="mb-3"></div>
                             
                             <div v-if="form.mobile" class="small text-muted mb-1">
                                 <i class="fas fa-phone-alt me-1 text-secondary"></i> {{ form.mobile }}

@@ -11,6 +11,7 @@ const props = defineProps({
     galleryItems: Array,
     eventDate: String,
     sponsors: Array,
+    faqs: Array,
 });
 import '@hixbe/kalpurush';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -78,6 +79,10 @@ const isMenuOpen = ref(false);
 const isDropdownOpen = ref(false);
 
 const selectedMember = ref(null);
+const activeFaqId = ref(null);
+const toggleFaq = (id) => {
+    activeFaqId.value = activeFaqId.value === id ? null : id;
+};
 const feedbackForm = ref({ name: '', contact: '', type: 'suggestion', message: '' });
 const feedbackSuccess = ref('');
 
@@ -614,6 +619,9 @@ onUnmounted(() => {
                             </div>
                             <h6 class="mt-2 mb-1 text-dark fw-bold" style="font-size: 0.95rem;">{{ member.name }}</h6>
                             <small class="text-muted d-block" style="font-size: 0.8rem;">{{ member.role }}</small>
+                            <small v-if="member.batch" class="d-block mt-1" style="font-size: 0.75rem; color: #0F4C5C; font-weight: 600;">
+                                <i class="fas fa-graduation-cap me-1"></i>ব্যাচ-{{ toBengaliDigits(member.batch) }}
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -664,6 +672,39 @@ onUnmounted(() => {
                             <img :src="getImageUrl(sp.logo)" class="sponsor-logo img-fluid" :alt="sp.name" />
                         </a>
                         <img v-else :src="getImageUrl(sp.logo)" class="sponsor-logo img-fluid" :alt="sp.name" />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- সচরাচর জিজ্ঞাসা (FAQ) -->
+        <section id="faq" class="container my-5" data-aos="fade-up" v-if="props.faqs && props.faqs.length > 0">
+            <div class="glass-card p-4">
+                <h3 class="text-center gold-text fw-bold mb-2">
+                    <i class="fas fa-question-circle"></i> সচরাচর জিজ্ঞাসা (FAQ)
+                </h3>
+                <p class="text-center text-muted">উৎসব সম্পর্কিত সাধারণ কিছু প্রশ্ন ও উত্তর</p>
+                <div class="accordion accordion-flush mt-4" id="faqAccordion">
+                    <div v-for="(faq, index) in props.faqs" :key="faq.id" class="accordion-item bg-transparent border-bottom border-secondary-subtle py-2">
+                        <h2 class="accordion-header" :id="'heading' + faq.id">
+                            <button
+                                class="accordion-button bg-transparent text-dark fw-bold fs-6 shadow-none"
+                                :class="{ 'collapsed': activeFaqId !== faq.id }"
+                                type="button"
+                                @click="toggleFaq(faq.id)"
+                            >
+                                <span class="me-3 gold-text">{{ toBengaliDigits(index + 1) }}.</span> {{ faq.question }}
+                            </button>
+                        </h2>
+                        <div
+                            :id="'collapse' + faq.id"
+                            class="accordion-collapse collapse"
+                            :class="{ 'show': activeFaqId === faq.id }"
+                        >
+                            <div class="accordion-body text-secondary px-4 pt-2 pb-3" style="line-height: 1.7;">
+                                {{ faq.answer }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -918,5 +959,30 @@ onUnmounted(() => {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Custom FAQ Accordion styling */
+#faqAccordion .accordion-button {
+    color: #0f4c5c !important;
+}
+#faqAccordion .accordion-button:not(.collapsed) {
+    background-color: transparent !important;
+    color: #D4AF37 !important;
+    box-shadow: none !important;
+}
+#faqAccordion .accordion-button::after {
+    filter: none !important;
+}
+#faqAccordion .accordion-button:not(.collapsed)::after {
+    filter: sepia(100%) saturate(1000%) hue-rotate(340deg) brightness(85%) contrast(85%) !important;
+}
+#faqAccordion .accordion-body {
+    color: #2c3e50 !important;
+}
+#faqAccordion .accordion-collapse {
+    display: none !important;
+}
+#faqAccordion .accordion-collapse.show {
+    display: block !important;
 }
 </style>

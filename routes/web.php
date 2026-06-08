@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CommitteeMemberController;
 use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\FaqController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -18,6 +19,7 @@ use App\Models\CommitteeMember;
 use App\Models\MediaGallery;
 use App\Models\Setting;
 use App\Models\Sponsor;
+use App\Models\Faq;
 use App\Http\Controllers\Admin\SponsorController;
 use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\EssayController;
@@ -34,6 +36,7 @@ Route::get('/', function () {
     $gallery       = MediaGallery::orderBy('sort_order')->get();
     $eventDate     = Setting::get('event_date', '2027-04-10');
     $sponsors      = Sponsor::orderBy('sort_order')->get();
+    $faqs          = Faq::where('is_active', true)->orderBy('sort_order')->orderBy('id')->get();
 
     return Inertia::render('JssAge60', [
         'seo' => [
@@ -49,6 +52,7 @@ Route::get('/', function () {
         'galleryItems'          => $gallery,
         'eventDate'             => $eventDate,
         'sponsors'              => $sponsors,
+        'faqs'                  => $faqs,
     ]);
 });
 
@@ -124,6 +128,9 @@ Route::middleware('auth')->group(function () {
 
     // Sponsors management
     Route::resource('/admin/sponsors', SponsorController::class)->names('admin.sponsors');
+
+    // FAQ management
+    Route::resource('/admin/faq', FaqController::class)->names('admin.faq');
 
     // Committee members management
     Route::get('/admin/committee', [CommitteeMemberController::class, 'index'])->name('admin.committee.index');

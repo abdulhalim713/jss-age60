@@ -47,6 +47,7 @@ class CommitteeMemberController extends Controller
             'image'      => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
             'mobile'     => 'nullable|string|max:20',
             'address'    => 'nullable|string|max:1000',
+            'batch'      => 'nullable|string|max:10',
         ]);
 
         if ($request->hasFile('image')) {
@@ -82,6 +83,7 @@ class CommitteeMemberController extends Controller
             'image'      => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
             'mobile'     => 'nullable|string|max:20',
             'address'    => 'nullable|string|max:1000',
+            'batch'      => 'nullable|string|max:10',
         ]);
 
         if ($request->hasFile('image')) {
