@@ -116,6 +116,7 @@ const showAccountsMessage = () => {
                                     <li><Link class="dropdown-item" href="/#committee">উপদেষ্টা কমিটি</Link></li>
                                     <li><Link class="dropdown-item" href="/#committee">উদযাপন কমিটি</Link></li>
                                     <li><Link class="dropdown-item" href="/#committee">খাতভিত্তিক উপ কমিটি</Link></li>
+                                    <li><Link class="dropdown-item" href="/batch-representatives">ব্যাচ ভিত্তিক প্রতিনিধি</Link></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="#" @click.prevent="showAccountsMessage()">আয় ব্যয় হিসাব</a></li>
                                 </ul>

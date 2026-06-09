@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\FaqController;
+use App\Http\Controllers\Admin\BatchRepresentativeController;
+use App\Models\BatchRepresentative;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -100,6 +102,23 @@ Route::get('/essays/write', [EssayController::class, 'publicCreate'])->name('ess
 Route::post('/essays', [EssayController::class, 'publicStore'])->name('essays.store');
 Route::get('/essays/{essay}', [EssayController::class, 'publicShow'])->name('essays.show');
 
+// Public: batch representatives
+Route::get('/batch-representatives', function () {
+    $representatives = BatchRepresentative::where('is_active', true)
+        ->orderBy('batch')
+        ->orderBy('sort_order')
+        ->orderBy('name')
+        ->get();
+
+    $batches = BatchRepresentative::where('is_active', true)
+        ->select('batch')->distinct()->orderBy('batch')->pluck('batch');
+
+    return Inertia::render('BatchRepresentatives/Index', [
+        'representatives' => $representatives,
+        'batches'         => $batches,
+    ]);
+})->name('batch-representatives.index');
+
 Route::get('/dashboard', [AlumniController::class, 'adminDashboard'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
@@ -131,6 +150,13 @@ Route::middleware('auth')->group(function () {
 
     // FAQ management
     Route::resource('/admin/faq', FaqController::class)->names('admin.faq');
+
+    // Batch Representatives management
+    Route::get('/admin/batch-representatives', [BatchRepresentativeController::class, 'index'])->name('admin.batch-representatives.index');
+    Route::get('/admin/batch-representatives/create', [BatchRepresentativeController::class, 'create'])->name('admin.batch-representatives.create');
+    Route::post('/admin/batch-representatives', [BatchRepresentativeController::class, 'store'])->name('admin.batch-representatives.store');
+    Route::patch('/admin/batch-representatives/{representative}/toggle-active', [BatchRepresentativeController::class, 'toggleActive'])->name('admin.batch-representatives.toggle-active');
+    Route::delete('/admin/batch-representatives/{representative}', [BatchRepresentativeController::class, 'destroy'])->name('admin.batch-representatives.destroy');
 
     // Committee members management
     Route::get('/admin/committee', [CommitteeMemberController::class, 'index'])->name('admin.committee.index');

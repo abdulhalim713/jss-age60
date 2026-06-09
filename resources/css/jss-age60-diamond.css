@@ -132,8 +132,8 @@
     transition: 0.3s;
 }
 
-/* Override Tailwind CSS visibility: collapse conflict on Bootstrap's navbar-collapse */
-.jss-age60-root .navbar-diamond .navbar-collapse {
+/* Override Tailwind CSS visibility: collapse conflict on Bootstrap's collapse */
+.jss-age60-root .collapse {
     visibility: visible !important;
 }
 

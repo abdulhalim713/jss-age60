@@ -9,7 +9,15 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
+    title: (title) => {
+        if (!title) {
+            return appName === 'Laravel' ? 'হীরক জয়ন্তী | জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয়' : appName;
+        }
+        if (appName === 'Laravel' || title.includes(appName)) {
+            return title;
+        }
+        return `${title} - ${appName}`;
+    },
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.vue`,

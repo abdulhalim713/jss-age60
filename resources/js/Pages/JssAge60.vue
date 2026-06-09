@@ -369,6 +369,7 @@ onUnmounted(() => {
                                     <li><a class="dropdown-item" href="#committee" @click.prevent="scrollTo('committee'); isMenuOpen = false; isDropdownOpen = false;">উপদেষ্টা কমিটি</a></li>
                                     <li><a class="dropdown-item" href="#committee" @click.prevent="scrollTo('committee'); isMenuOpen = false; isDropdownOpen = false;">উদযাপন কমিটি</a></li>
                                     <li><a class="dropdown-item" href="#committee" @click.prevent="scrollTo('committee'); isMenuOpen = false; isDropdownOpen = false;">খাতভিত্তিক উপ কমিটি</a></li>
+                                    <li><a class="dropdown-item" href="/batch-representatives" @click="isMenuOpen = false; isDropdownOpen = false;">ব্যাচ ভিত্তিক প্রতিনিধি</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="#" @click.prevent="showAccountsMessage(); isMenuOpen = false; isDropdownOpen = false;">আয় ব্যয় হিসাব</a></li>
                                 </ul>
