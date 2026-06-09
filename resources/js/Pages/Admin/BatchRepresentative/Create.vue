@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 
 const props = defineProps({
     alumni: Object,   // paginated alumni list
@@ -26,50 +26,40 @@ watch([filterBatch, filterSearch], () => {
     debounce = setTimeout(applyFilters, 350);
 });
 
-// ---- Form ----
-const form = useForm({
-    alumni_id:  null,
-    name:       '',
-    batch:      '',
-    mobile:     '',
-    address:    '',
-    image:      null,
-    sort_order: 0,
-    is_active:  true,
-});
+// ---- Bulk Selection ----
+const selectedAlumniList = ref([]);
 
-const imagePreview = ref(null);
-const selectedAlumni = ref(null);
-
-const selectAlumni = (alumnus) => {
-    selectedAlumni.value = alumnus;
-    form.alumni_id = alumnus.id;
-    form.name      = alumnus.name    || '';
-    form.batch     = alumnus.batch   || '';
-    form.mobile    = alumnus.phone   || '';
-    form.address   = alumnus.address || '';
-};
-
-const clearSelection = () => {
-    selectedAlumni.value = null;
-    form.alumni_id = null;
-    form.name      = '';
-    form.batch     = '';
-    form.mobile    = '';
-    form.address   = '';
-};
-
-const onImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        form.image = file;
-        imagePreview.value = URL.createObjectURL(file);
+const toggleSelection = (alumnus) => {
+    const index = selectedAlumniList.value.findIndex(a => a.id === alumnus.id);
+    if (index > -1) {
+        selectedAlumniList.value.splice(index, 1);
+    } else {
+        selectedAlumniList.value.push(alumnus);
     }
 };
 
-const submit = () => {
+const isSelected = (id) => {
+    return selectedAlumniList.value.some(a => a.id === id);
+};
+
+const removeSelected = (id) => {
+    selectedAlumniList.value = selectedAlumniList.value.filter(a => a.id !== id);
+};
+
+const clearSelection = () => {
+    selectedAlumniList.value = [];
+};
+
+const form = useForm({
+    alumni_ids: [],
+});
+
+const submitBulk = () => {
+    form.alumni_ids = selectedAlumniList.value.map(a => a.id);
     form.post(route('admin.batch-representatives.store'), {
-        forceFormData: true,
+        onSuccess: () => {
+            selectedAlumniList.value = [];
+        }
     });
 };
 </script>
@@ -80,19 +70,25 @@ const submit = () => {
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="fw-bold mb-0">
-                <i class="fas fa-plus-circle text-success me-2"></i> নতুন ব্যাচ ভিত্তিক প্রতিনিধি যোগ
+                <i class="fas fa-users text-success me-2"></i> একাধিক প্রতিনিধি একসাথে যোগ
             </h4>
             <Link :href="route('admin.batch-representatives.index')" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-arrow-left me-1"></i> তালিকায় ফিরুন
             </Link>
         </div>
 
+        <!-- Info Note -->
+        <div class="alert alert-info border-0 rounded-3 mb-4 small">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>টিপস:</strong> বাম দিকের তালিকা থেকে এক বা একাধিক অ্যালামনাই সিলেক্ট করুন। ডান দিকে নির্বাচিতদের তালিকা দেখা যাবে। একসাথে "সংরক্ষণ করুন" ক্লিক করলে সবাই প্রতিনিধি হিসেবে যুক্ত হবে। পরবর্তীতে তাদের ছবি বা তথ্য পরিবর্তন করতে হলে মূল তালিকা থেকে 'সম্পাদনা' করুন।
+        </div>
+
         <div class="row g-4">
             <!-- ======= LEFT: Alumni Search Panel ======= -->
             <div class="col-lg-7">
-                <div class="card border-0 shadow-sm rounded-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
                     <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4">
-                        <i class="fas fa-search me-2"></i> অ্যালামনাই তালিকা থেকে অনুসন্ধান ও নির্বাচন করুন
+                        <i class="fas fa-search me-2"></i> অ্যালামনাই নির্বাচন করুন
                     </div>
                     <div class="card-body p-4">
                         <!-- Search filters -->
@@ -123,10 +119,12 @@ const submit = () => {
                             <table class="table table-hover align-middle mb-0" style="font-size:0.93rem;">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="ps-3">নাম</th>
+                                        <th class="ps-3" style="width:50px;">
+                                            <i class="fas fa-check-square text-muted"></i>
+                                        </th>
+                                        <th>নাম</th>
                                         <th>ব্যাচ</th>
                                         <th>মোবাইল</th>
-                                        <th class="text-center" style="width:90px;">নির্বাচন</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -139,26 +137,20 @@ const submit = () => {
                                     <tr
                                         v-for="a in alumni.data"
                                         :key="a.id"
-                                        :class="{ 'table-warning': selectedAlumni?.id === a.id }"
+                                        :class="{ 'table-success': isSelected(a.id) }"
+                                        @click="toggleSelection(a)"
+                                        style="cursor: pointer;"
                                     >
-                                        <td class="ps-3 fw-semibold">{{ a.name }}</td>
+                                        <td class="ps-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" :checked="isSelected(a.id)" @click.stop="toggleSelection(a)" style="cursor: pointer;">
+                                            </div>
+                                        </td>
+                                        <td class="fw-semibold">{{ a.name }}</td>
                                         <td>
                                             <span class="badge bg-primary-subtle text-primary border">{{ a.batch }}</span>
                                         </td>
                                         <td class="text-muted small">{{ a.phone || '—' }}</td>
-                                        <td class="text-center">
-                                            <button
-                                                v-if="selectedAlumni?.id !== a.id"
-                                                type="button"
-                                                class="btn btn-sm btn-outline-success"
-                                                @click="selectAlumni(a)"
-                                            >
-                                                <i class="fas fa-check me-1"></i> বেছে নিন
-                                            </button>
-                                            <span v-else class="badge bg-success">
-                                                <i class="fas fa-check-circle me-1"></i> নির্বাচিত
-                                            </span>
-                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -183,146 +175,58 @@ const submit = () => {
                 </div>
             </div>
 
-            <!-- ======= RIGHT: Form Panel ======= -->
+            <!-- ======= RIGHT: Selected Panel ======= -->
             <div class="col-lg-5">
                 <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top:80px;">
-                    <div class="card-header bg-success text-white rounded-top-4 py-3 px-4">
-                        <i class="fas fa-user-edit me-2"></i> প্রতিনিধির তথ্য
+                    <div class="card-header bg-success text-white rounded-top-4 py-3 px-4 d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-clipboard-check me-2"></i> নির্বাচিত অ্যালামনাই</span>
+                        <span class="badge bg-light text-success">{{ selectedAlumniList.length }} জন</span>
                     </div>
-                    <div class="card-body p-4">
-                        <!-- Selected alumni indicator -->
-                        <div v-if="selectedAlumni" class="alert alert-success border-0 rounded-3 mb-3 d-flex align-items-center justify-content-between py-2">
-                            <span class="small fw-semibold">
-                                <i class="fas fa-check-circle me-1"></i>
-                                নির্বাচিত: <strong>{{ selectedAlumni.name }}</strong> (ব্যাচ {{ selectedAlumni.batch }})
-                            </span>
-                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" @click="clearSelection">
-                                <i class="fas fa-times"></i>
-                            </button>
+                    <div class="card-body p-4 d-flex flex-column" style="max-height: 600px;">
+                        
+                        <div v-if="selectedAlumniList.length === 0" class="text-center text-muted py-5 my-auto">
+                            <i class="fas fa-hand-pointer fs-1 mb-3 opacity-25"></i>
+                            <p>বাম দিকের তালিকা থেকে<br>প্রতিনিধি নির্বাচন করুন।</p>
                         </div>
-                        <div v-else class="alert alert-warning border-0 rounded-3 mb-3 small">
-                            <i class="fas fa-info-circle me-1"></i>
-                            বাম দিক থেকে একজন অ্যালামনাই বেছে নিন। তথ্য স্বয়ংক্রিয়ভাবে পূরণ হবে।
-                        </div>
-
-                        <form @submit.prevent="submit">
-                            <!-- Name -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">নাম <span class="text-danger">*</span></label>
-                                <input
-                                    v-model="form.name"
-                                    type="text"
-                                    class="form-control rounded-pill px-3"
-                                    :class="{ 'is-invalid': form.errors.name }"
-                                    placeholder="প্রতিনিধির নাম"
-                                    required
-                                />
-                                <div v-if="form.errors.name" class="invalid-feedback">{{ form.errors.name }}</div>
-                            </div>
-
-                            <!-- Batch -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">ব্যাচ (সাল) <span class="text-danger">*</span></label>
-                                <input
-                                    v-model="form.batch"
-                                    type="text"
-                                    class="form-control rounded-pill px-3"
-                                    :class="{ 'is-invalid': form.errors.batch }"
-                                    placeholder="যেমন: ১৯৯৫"
-                                    required
-                                />
-                                <div v-if="form.errors.batch" class="invalid-feedback">{{ form.errors.batch }}</div>
-                            </div>
-
-                            <!-- Mobile -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">মোবাইল নম্বর</label>
-                                <input
-                                    v-model="form.mobile"
-                                    type="tel"
-                                    class="form-control rounded-pill px-3"
-                                    :class="{ 'is-invalid': form.errors.mobile }"
-                                    placeholder="০১XXXXXXXXX"
-                                />
-                                <div v-if="form.errors.mobile" class="invalid-feedback">{{ form.errors.mobile }}</div>
-                            </div>
-
-                            <!-- Address -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">ঠিকানা</label>
-                                <input
-                                    v-model="form.address"
-                                    type="text"
-                                    class="form-control rounded-pill px-3"
-                                    :class="{ 'is-invalid': form.errors.address }"
-                                    placeholder="বর্তমান ঠিকানা"
-                                />
-                                <div v-if="form.errors.address" class="invalid-feedback">{{ form.errors.address }}</div>
-                            </div>
-
-                            <!-- Image -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">ছবি (ঐচ্ছিক)</label>
-                                <div class="d-flex align-items-center gap-3">
-                                    <div
-                                        class="d-flex align-items-center justify-content-center rounded-circle border overflow-hidden flex-shrink-0"
-                                        style="width:56px;height:56px;background:#f8f9fa;"
-                                    >
-                                        <img v-if="imagePreview" :src="imagePreview" class="w-100 h-100" style="object-fit:cover;" />
-                                        <i v-else class="fas fa-user text-muted fs-4"></i>
-                                    </div>
-                                    <input
-                                        type="file"
-                                        class="form-control rounded-pill"
-                                        accept="image/*"
-                                        @change="onImageChange"
-                                    />
-                                </div>
-                                <div v-if="form.errors.image" class="text-danger small mt-1">{{ form.errors.image }}</div>
-                            </div>
-
-                            <!-- Sort Order + Active -->
-                            <div class="row g-3 mb-4">
-                                <div class="col-6">
-                                    <label class="form-label fw-semibold">ক্রম (Sort)</label>
-                                    <input
-                                        v-model.number="form.sort_order"
-                                        type="number"
-                                        min="0"
-                                        class="form-control rounded-pill px-3"
-                                    />
-                                </div>
-                                <div class="col-6 d-flex align-items-end">
-                                    <div class="form-check form-switch pb-1">
-                                        <input
-                                            v-model="form.is_active"
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            id="isActiveSwitch"
-                                        />
-                                        <label class="form-check-label fw-semibold" for="isActiveSwitch">
-                                            সক্রিয় রাখুন
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Submit -->
-                            <div class="d-grid">
-                                <button
-                                    type="submit"
-                                    class="btn btn-success fw-semibold py-2"
-                                    :disabled="form.processing || !form.name"
-                                >
-                                    <span v-if="form.processing">
-                                        <i class="fas fa-spinner fa-spin me-1"></i> সংরক্ষণ হচ্ছে...
-                                    </span>
-                                    <span v-else>
-                                        <i class="fas fa-save me-1"></i> প্রতিনিধি সংরক্ষণ করুন
-                                    </span>
+                        
+                        <div v-else class="flex-grow-1 overflow-auto pe-2 mb-4">
+                            <div class="d-flex justify-content-end mb-2">
+                                <button class="btn btn-sm btn-link text-danger text-decoration-none p-0" @click="clearSelection">
+                                    <i class="fas fa-trash-alt me-1"></i> সব মুছুন
                                 </button>
                             </div>
-                        </form>
+                            
+                            <ul class="list-group list-group-flush border-top border-bottom">
+                                <li v-for="sel in selectedAlumniList" :key="sel.id" class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold">{{ sel.name }}</div>
+                                        <div class="small text-muted">
+                                            <span class="badge bg-light text-dark border me-1">ব্যাচ {{ sel.batch }}</span>
+                                            <i class="fas fa-phone-alt ms-1 me-1 text-secondary" style="font-size:10px;"></i>{{ sel.phone || '—' }}
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-danger border-0" @click="removeSelected(sel.id)" title="তালিকা থেকে বাদ দিন">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="mt-auto pt-3 border-top" v-if="selectedAlumniList.length > 0">
+                            <button
+                                @click="submitBulk"
+                                class="btn btn-success fw-bold py-3 w-100 rounded-pill shadow-sm"
+                                :disabled="form.processing"
+                            >
+                                <span v-if="form.processing">
+                                    <i class="fas fa-spinner fa-spin me-1"></i> সংরক্ষণ হচ্ছে...
+                                </span>
+                                <span v-else>
+                                    <i class="fas fa-save me-1"></i> {{ selectedAlumniList.length }} জনকে সংরক্ষণ করুন
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

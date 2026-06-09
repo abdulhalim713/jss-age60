@@ -155,6 +155,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/batch-representatives', [BatchRepresentativeController::class, 'index'])->name('admin.batch-representatives.index');
     Route::get('/admin/batch-representatives/create', [BatchRepresentativeController::class, 'create'])->name('admin.batch-representatives.create');
     Route::post('/admin/batch-representatives', [BatchRepresentativeController::class, 'store'])->name('admin.batch-representatives.store');
+    Route::get('/admin/batch-representatives/{representative}/edit', [BatchRepresentativeController::class, 'edit'])->name('admin.batch-representatives.edit');
+    Route::put('/admin/batch-representatives/{representative}', [BatchRepresentativeController::class, 'update'])->name('admin.batch-representatives.update');
     Route::patch('/admin/batch-representatives/{representative}/toggle-active', [BatchRepresentativeController::class, 'toggleActive'])->name('admin.batch-representatives.toggle-active');
     Route::delete('/admin/batch-representatives/{representative}', [BatchRepresentativeController::class, 'destroy'])->name('admin.batch-representatives.destroy');
 

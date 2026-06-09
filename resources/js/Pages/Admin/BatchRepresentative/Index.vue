@@ -136,6 +136,13 @@ const groupedByBatch = (reps) => {
                                     </span>
                                 </td>
                                 <td class="text-center">
+                                    <Link
+                                        :href="route('admin.batch-representatives.edit', rep.id)"
+                                        class="btn btn-sm btn-outline-primary me-1"
+                                        title="সম্পাদনা"
+                                    >
+                                        <i class="fas fa-edit"></i>
+                                    </Link>
                                     <button
                                         class="btn btn-sm btn-outline-danger"
                                         @click="confirmDelete(rep)"

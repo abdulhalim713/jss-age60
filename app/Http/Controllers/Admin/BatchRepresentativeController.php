@@ -61,13 +61,53 @@ class BatchRepresentativeController extends Controller
     }
 
     /**
-     * Store a new batch representative.
-     * The selected alumni_id + pre-filled data come from the form.
+     * Store multiple batch representatives.
      */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'alumni_id'  => 'nullable|exists:alumni,id',
+            'alumni_ids'   => 'required|array|min:1',
+            'alumni_ids.*' => 'exists:alumni,id',
+        ]);
+
+        $alumniList = Alumni::whereIn('id', $validated['alumni_ids'])->get();
+
+        foreach ($alumniList as $alumni) {
+            // Check if already a representative
+            $exists = BatchRepresentative::where('alumni_id', $alumni->id)->exists();
+            if (!$exists) {
+                BatchRepresentative::create([
+                    'alumni_id'  => $alumni->id,
+                    'name'       => $alumni->name,
+                    'batch'      => $alumni->batch,
+                    'mobile'     => $alumni->phone,
+                    'address'    => $alumni->address,
+                    'is_active'  => true,
+                    'sort_order' => 0,
+                ]);
+            }
+        }
+
+        return redirect()->route('admin.batch-representatives.index')
+            ->with('success', count($alumniList) . ' জন ব্যাচ ভিত্তিক প্রতিনিধি সফলভাবে যোগ করা হয়েছে।');
+    }
+
+    /**
+     * Show form to edit an existing representative.
+     */
+    public function edit(BatchRepresentative $representative): Response
+    {
+        return Inertia::render('Admin/BatchRepresentative/Edit', [
+            'representative' => $representative,
+        ]);
+    }
+
+    /**
+     * Update an existing representative.
+     */
+    public function update(Request $request, BatchRepresentative $representative): RedirectResponse
+    {
+        $validated = $request->validate([
             'name'       => 'required|string|max:255',
             'batch'      => 'required|string|max:20',
             'mobile'     => 'nullable|string|max:20',
@@ -78,16 +118,21 @@ class BatchRepresentativeController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
+            if ($representative->image && Storage::disk('public')->exists($representative->image)) {
+                Storage::disk('public')->delete($representative->image);
+            }
             $validated['image'] = $request->file('image')->store('batch-representatives', 'public');
+        } else {
+            unset($validated['image']);
         }
 
         $validated['sort_order'] = $validated['sort_order'] ?? 0;
-        $validated['is_active']  = $validated['is_active']  ?? true;
+        $validated['is_active']  = $validated['is_active'] ?? true;
 
-        BatchRepresentative::create($validated);
+        $representative->update($validated);
 
         return redirect()->route('admin.batch-representatives.index')
-            ->with('success', 'ব্যাচ ভিত্তিক প্রতিনিধি সফলভাবে যোগ করা হয়েছে।');
+            ->with('success', 'প্রতিনিধির তথ্য সফলভাবে আপডেট করা হয়েছে।');
     }
 
     /**
