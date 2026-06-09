@@ -16,15 +16,25 @@ class BatchRepresentativeController extends Controller
     /**
      * List all batch representatives.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $representatives = BatchRepresentative::orderBy('batch')
+        $query = BatchRepresentative::query();
+
+        if ($request->filled('batch')) {
+            $query->where('batch', $request->input('batch'));
+        }
+
+        $representatives = $query->orderBy('batch')
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
 
+        $batches = BatchRepresentative::select('batch')->distinct()->orderBy('batch')->pluck('batch');
+
         return Inertia::render('Admin/BatchRepresentative/Index', [
             'representatives' => $representatives,
+            'batches'         => $batches,
+            'filters'         => $request->only(['batch']),
         ]);
     }
 

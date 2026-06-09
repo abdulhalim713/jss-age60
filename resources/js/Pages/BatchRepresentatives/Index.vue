@@ -38,6 +38,10 @@ const getInitials = (name) => (name || '').split(' ').map(n => n[0]).join('').sl
 const showAccountsMessage = () => {
     alert('আয়-ব্যয় হিসাব: হীরক জয়ন্তী উদযাপনের আয়-ব্যয় হিসাব কার্যক্রম শেষ হলে এখানে বিস্তারিত প্রকাশ করা হবে। ধন্যবাদ!');
 };
+
+const printPage = () => {
+    window.print();
+};
 </script>
 
 <template>
@@ -51,7 +55,7 @@ const showAccountsMessage = () => {
     </Head>
 
     <div id="app" class="jss-age60-root">
-        <header class="site-header">
+        <header class="site-header d-print-none">
             <!-- টপবার -->
             <div class="topbar-diamond">
                 <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -109,7 +113,7 @@ const showAccountsMessage = () => {
         </header>
 
         <!-- হিরো ব্যানার -->
-        <section class="hero-diamond p-0 overflow-hidden" style="min-height: 250px; padding: 60px 0 80px !important;">
+        <section class="hero-diamond p-0 overflow-hidden d-print-none" style="min-height: 250px; padding: 60px 0 80px !important;">
             <div class="container text-center text-white" style="margin-top: 2rem;">
                 <div class="d-inline-block diamond-badge rounded-pill px-4 py-2 mb-3">
                     <i class="fas fa-user-shield gold-text me-2"></i> প্রতিনিধি পরিচিতি
@@ -123,10 +127,19 @@ const showAccountsMessage = () => {
             </div>
         </section>
 
+        <!-- প্রিন্ট হেডার (শুধু প্রিন্ট করার সময় দেখাবে) -->
+        <div class="print-header d-none d-print-flex">
+            <img :src="logoUrl" alt="হীরক জয়ন্তী লোগো" />
+            <div>
+                <h2>জোড়পুকুরিয়া মাধ্যমিক বিদ্যালয় হীরক জয়ন্তী ২০২৭</h2>
+                <h4>ব্যাচ ভিত্তিক প্রতিনিধি তালিকা <span v-if="selectedBatch">({{ selectedBatch }} ব্যাচ)</span></h4>
+            </div>
+        </div>
+
         <!-- মূল কন্টেন্ট -->
-        <main class="container my-5">
+        <main class="container my-5 content-area">
             <!-- ফিল্টার প্যানেল -->
-            <div class="glass-card mb-5">
+            <div class="glass-card mb-5 d-print-none">
                 <div class="card-header-diamond">
                     <i class="fas fa-filter me-2"></i> ব্যাচ অনুযায়ী ফিল্টার করুন
                 </div>
@@ -160,11 +173,14 @@ const showAccountsMessage = () => {
             </div>
             <div v-else>
                 <!-- Header row -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
                     <h4 class="fw-bold gold-text mb-0">
                         <i class="fas fa-users me-2"></i>
                         {{ selectedBatch ? `ব্যাচ ${selectedBatch} প্রতিনিধি` : 'সকল ব্যাচের প্রতিনিধি' }}
                     </h4>
+                    <button class="btn btn-primary rounded-pill px-4 print-btn" @click="printPage">
+                        <i class="fas fa-print me-2"></i> প্রিন্ট করুন
+                    </button>
                 </div>
 
                 <!-- Representatives Table -->
@@ -222,7 +238,7 @@ const showAccountsMessage = () => {
         </main>
 
         <!-- ফুটার -->
-        <footer id="footer" class="py-5">
+        <footer id="footer" class="py-5 d-print-none">
             <div class="container">
                 <div class="row g-4">
                     <div class="col-md-5">
@@ -363,5 +379,92 @@ const showAccountsMessage = () => {
 
 @media (max-width: 768px) {
     .hero-diamond { padding: 40px 0 50px !important; }
+}
+
+@media print {
+    /* Hide non-essential elements */
+    .site-header, #footer, .hero-diamond, .btn-reset-custom, select, .print-btn {
+        display: none !important;
+    }
+
+    body, .jss-age60-root {
+        background: white !important;
+        color: black !important;
+    }
+
+    .glass-card {
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+    }
+
+    .rep-table-wrapper {
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+    }
+
+    .rep-table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+    }
+
+    .rep-table th, .rep-table td {
+        border: 1px solid #000 !important;
+        padding: 8px !important;
+        color: #000 !important;
+    }
+
+    .rep-table th {
+        background-color: #f0f0f0 !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .badge {
+        border: none !important;
+        color: #000 !important;
+        background: transparent !important;
+        padding: 0 !important;
+    }
+    
+    /* Print Header configuration */
+    .print-header {
+        display: flex !important;
+        align-items: center;
+        border-bottom: 2px solid #000;
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+        margin-top: 20px;
+    }
+    
+    .print-header img {
+        width: 80px;
+        height: auto;
+        margin-right: 20px;
+    }
+    
+    .print-header h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+        color: #000;
+    }
+    
+    .print-header h4 {
+        margin: 5px 0 0 0;
+        font-size: 18px;
+        color: #333;
+    }
+    
+    .content-area {
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
 }
 </style>
