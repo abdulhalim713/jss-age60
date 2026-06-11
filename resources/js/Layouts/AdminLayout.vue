@@ -167,6 +167,17 @@ onUnmounted(() => {
                             </Link>
                         </li>
 
+                        <li class="nav-item">
+                            <Link 
+                                :href="route('admin.essays.index')" 
+                                class="nav-link px-3 py-2 rounded-2 text-decoration-none d-flex align-items-center gap-3 text-white-50" 
+                                :class="{ 'active bg-primary text-white': route().current('admin.essays.*') }"
+                            >
+                                <i class="nav-icon fas fa-book-open"></i>
+                                <span>স্মৃতিচারণ প্রবন্ধ</span>
+                            </Link>
+                        </li>
+
                         <!-- সাইটের বিভাজন লাইন -->
                         <li class="nav-item pt-2 pb-1">
                             <small class="text-white-25 text-uppercase px-3" style="font-size:0.65rem;letter-spacing:0.08em;">সাইট ব্যবস্থাপনা</small>

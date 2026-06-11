@@ -371,11 +371,12 @@ onUnmounted(() => {
                                     <li><a class="dropdown-item" href="#committee" @click.prevent="scrollTo('committee'); isMenuOpen = false; isDropdownOpen = false;">খাতভিত্তিক উপ কমিটি</a></li>
                                     <li><a class="dropdown-item" href="/batch-representatives" @click="isMenuOpen = false; isDropdownOpen = false;">ব্যাচ ভিত্তিক প্রতিনিধি</a></li>
                                     <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#donation" @click.prevent="scrollTo('donation'); isMenuOpen = false; isDropdownOpen = false;">স্পন্সর ও ডোনেশন</a></li>
                                     <li><a class="dropdown-item" href="#" @click.prevent="showAccountsMessage(); isMenuOpen = false; isDropdownOpen = false;">আয় ব্যয় হিসাব</a></li>
                                 </ul>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#register" @click.prevent="scrollTo('register'); isMenuOpen = false;">স্মৃতিচারণ প্রবন্ধ</a>
+                                <a class="nav-link" href="/essays" @click="isMenuOpen = false">স্মৃতিচারণ প্রবন্ধ</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="/friends">বন্ধু তালিকা</a>
@@ -593,6 +594,36 @@ onUnmounted(() => {
                                 <strong>{{ item.time }}</strong> - {{ item.name }}
                             </li>
                         </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- স্পন্সর ও ডোনেশন আবেদন -->
+        <section id="donation" class="container my-5" data-aos="fade-up">
+            <div class="glass-card p-4 p-md-5" style="border: 2px solid #D4AF37;">
+                <div class="row align-items-center">
+                    <div class="col-lg-8 mb-4 mb-lg-0 text-center text-lg-start">
+                        <h3 class="gold-text fw-bold mb-3">
+                            <i class="fas fa-hand-holding-heart me-2"></i> স্পন্সর ও ডোনেশন আবেদন
+                        </h3>
+                        <p class="fs-5 fst-italic text-dark mb-3">
+                            "এটি যেহেতু একটি বৃহৎ আয়োজনের কাজ, অনেক অর্থের প্রয়োজন। আপনাদের স্বতঃস্ফূর্ত অংশগ্রহণ ও আর্থিক সহায়তাই এই হীরক জয়ন্তী উৎসবকে সফল ও সার্থক করে তুলবে।"
+                        </p>
+                        <p class="text-secondary mb-0">
+                            বিদ্যালয়ের এই ঐতিহাসিক আয়োজনে স্পন্সর হিসেবে যুক্ত হতে বা যেকোনো পরিমাণ আর্থিক অনুদান দিতে আগ্রহীদের বিনীত অনুরোধ জানানো হচ্ছে। আপনাদের সহযোগিতা আমাদের অনুপ্রেরণা।
+                        </p>
+                    </div>
+                    <div class="col-lg-4 text-center">
+                        <div class="bg-light p-4 rounded-4 shadow-sm border">
+                            <i class="fas fa-wallet fa-3x gold-text mb-3"></i>
+                            <h5 class="fw-bold text-dark">যোগাযোগ করুন</h5>
+                            <p class="mb-1"><i class="fas fa-phone-alt text-muted me-2"></i> <strong>০১৭XX-XXXXXX</strong></p>
+                            <p class="mb-3"><i class="fas fa-envelope text-muted me-2"></i> <strong>finance@myjss.edu.bd</strong></p>
+                            <a href="#footer" @click.prevent="scrollTo('footer')" class="btn btn-diamond w-100">
+                                বিস্তারিত জানুন
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
